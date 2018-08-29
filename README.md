@@ -34,5 +34,5 @@ Complete la tabla:
 
 ## Entrega
 
-* Modo de entrega: clonar este repo-plantilla y subirlo a `https://github.com/username/cv/t1`.
+* Modo de entrega: clonar este repo y subirlo a `https://github.com/username/cv/t1`.
 * Plazo: 16/9/18 a las 24h.
