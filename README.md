@@ -9,7 +9,7 @@ Comprender algunos aspectos fundamentales de la [inferencia inconsciente](https:
 Implementar al menos 6 ilusiones de tres tipos distintos (paradójicas, geométricas, ambiguas, etc.), al menos dos con movimiento y dos con interactividad.
 
 ## Integrantes
-(2, o 3 si van a participar en el [best illusion of the year contest](illusionoftheyear.com))
+(2, o más si van a participar en el [best illusion of the year contest](http://illusionoftheyear.com/))
 
 Complete la tabla:
 
