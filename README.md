@@ -34,5 +34,5 @@ Complete la tabla:
 
 ## Entrega
 
-* Modo de entrega: [Fork](https://help.github.com/articles/fork-a-repo/) la plantilla en las cuentas de los integrantes (de las que se tomará una al azar).
-* Plazo: 18/3/18 a las 24h.
+* Modo de entrega: clonar este repo-plantilla y subirlo a `https://github.com/username/cv/t1`.
+* Plazo: 16/9/18 a las 24h.
