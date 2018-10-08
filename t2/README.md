@@ -42,12 +42,11 @@ Describa los resultados obtenidos. En el caso de anti-aliasing describir las té
 - Resultados obtenidos:
 ![Con titulo](https://github.com/gasierram/cv/blob/master/t2/images/result.PNG "Rasterización del triangulo")
 
-- Anti-aliasing:
-Subdividiendo cada píxel en n zonas. La intensidad del color es proporcional al numero de zonas que pertenecen al triangulo.
+## Dificultades:
 
-- Shading:
-Interpolación: Cada vertice del triangulo tiene un color inicial. Los puntos en el triangulo tienen cierta proporción de cada color bajo el criterio de su distancia a cada nodo.
-
+* No tener información clara de cómo se debe instalar la librería.
+* Tarda un tiempo entender el codigo de la libreria para aprovechar su uso.
+* Saber cuál es el punto adecuado para realizar los cálculos con base en la teoría.
 
 ## Entrega
 
