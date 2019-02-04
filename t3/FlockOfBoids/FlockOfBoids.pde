@@ -38,6 +38,10 @@ ArrayList<Boid> flock;
 Frame avatar;
 boolean animate = true;
 Interpolator interpolator;
+ArrayList<Boid> flockCurves=new ArrayList();
+ArrayList<Vector> curves =new ArrayList();
+
+
 
 void setup() {
   size(1000, 800, P3D);
@@ -62,6 +66,12 @@ void draw() {
   // uncomment to asynchronously update boid avatar. See mouseClicked()
   // updateAvatar(scene.trackedFrame("mouseClicked"));
   sceneDrawPath();
+  CubicCurves();
+  if(!curves.isEmpty() ){        
+  for(int i=0;i<curves.size()-1;i++){
+    strokeWeight(4); 
+    line(curves.get(i).x(), curves.get(i).y(), curves.get(i).z() , curves.get(i+1).x(), curves.get(i+1).y(), curves.get(i+1).z());
+  }}
 }
 
 void sceneDrawPath(){
@@ -71,6 +81,117 @@ void sceneDrawPath(){
    scene.drawPath(interpolator);
    popStyle();
 }
+
+void CubicCurves ()
+{
+  flockCurves.clear();
+  for(int i = 0; i < 8; i++){
+    flockCurves.add(flock.get(i));
+  }
+  
+  curves.clear();
+  int n=4;
+    int NUM_PTOS=10;
+    int i, j, m;
+    int xp, yp , zp;
+    double [] ax = new double [NUM_PTOS], bx= new double [NUM_PTOS], 
+    cx = new double [NUM_PTOS], dx = new double [NUM_PTOS], ay = new double [NUM_PTOS], 
+    by = new double [NUM_PTOS], cy = new double [NUM_PTOS], az= new double [NUM_PTOS],
+    bz= new double [NUM_PTOS], cz= new double [NUM_PTOS], dy= new double [NUM_PTOS], 
+    dz= new double [NUM_PTOS], derivada= new double [NUM_PTOS], gamma= new double [NUM_PTOS], omega = new double [NUM_PTOS];    
+    double t, dt;
+    //intervals
+    m = n-1;
+    // gamma
+    gamma[0] = .5;
+    for (i=1; i<m; i++) 
+    {
+      gamma[i] = 1./(4.-gamma[i-1]);
+    }
+    gamma[m] = 1./(2.-gamma[m-1]);
+    
+    
+    //omega para X 
+    omega[0] = 3.*(flockCurves.get(1).position.x()-flockCurves.get(0).position.x())*gamma[0];
+    for (i=1; i<m; i++) 
+    {
+      omega[i] = (3.*(flockCurves.get(i+1).position.x()-flockCurves.get(i-1).position.x())-omega[i-1])*gamma[i];
+    }
+    omega[m] = (3.*(flockCurves.get(m).position.x()-flockCurves.get(m-1).position.x())-omega[m-1])*gamma[m];
+    //derivada en los puntos de x
+    
+    derivada[m]=omega[m];
+    for (i=m-1; i>=0; i=i-1) 
+    {
+      derivada[i] = omega[i]-gamma[i]*derivada[i+1];
+    }
+    /* Sustituimos gamma, omega y la primera derivada
+    para calcular los coeficientes a, b, c y d */
+    for (i=0; i<m; i++) {
+      ax[i] = flockCurves.get(i).position.x();
+      bx[i] = derivada[i];
+      cx[i] = 3.*(flockCurves.get(i+1).position.x()-flockCurves.get(i).position.x())-2.*derivada[i]-derivada[i+1];
+      dx[i] = 2.*(flockCurves.get(i).position.x()-flockCurves.get(i+1).position.x())+derivada[i]+derivada[i+1];
+    }
+    
+// omega para Y
+
+    omega[0] = 3.*(flockCurves.get(1).position.y()-flockCurves.get(0).position.y())*gamma[0];
+    for (i=1; i<m; i++) {
+      omega[i] = (3.*(flockCurves.get(i+1).position.y()-flockCurves.get(i-1).position.y())-omega[i-1])*gamma[i];
+    }
+    omega[m] = (3.*(flockCurves.get(m).position.y()-flockCurves.get(m-1).position.y())-omega[m-1])*gamma[m];
+    
+    
+ //Derivada en y
+    derivada[m]=omega[m];
+    
+    for (i=m-1; i>=0; i=i-1){ 
+      derivada[i] = omega[i]-gamma[i]*derivada[i+1];
+    }
+// coeficientes a, b, c y d en eje Y 
+    for (i=0; i<m; i++) {
+    ay[i] = flockCurves.get(i).position.y();
+    by[i] = derivada[i];
+    cy[i] = 3.*(flockCurves.get(i+1).position.y()-flockCurves.get(i).position.y())-2.*derivada[i]-derivada[i+1];
+    dy[i] = 2.*(flockCurves.get(i).position.y()-flockCurves.get(i+1).position.y())+derivada[i]+derivada[i+1];
+    }
+    
+// omega para Z 
+    omega[0] = 3.*(flockCurves.get(1).position.z()-flockCurves.get(0).position.z())*gamma[0];
+    for (i=1; i<m; i++) {
+      omega[i] = (3.*(flockCurves.get(i+1).position.z()-flockCurves.get(i-1).position.z())-omega[i-1])*gamma[i];
+    }
+    omega[m] = (3.*(flockCurves.get(m).position.z()-flockCurves.get(m-1).position.z())-omega[m-1])*gamma[m];
+ // la primera derivada
+    derivada[m]=omega[m];
+    for (i=m-1; i>=0; i=i-1) {
+      derivada[i] = omega[i]-gamma[i]*derivada[i+1];
+    }
+// coeficientes a, b, c y d en eje Y 
+    for (i=0; i<m; i++) {
+      az[i] = flockCurves.get(i).position.z();
+      bz[i] = derivada[i];
+      cz[i] = 3.*(flockCurves.get(i+1).position.z()-flockCurves.get(i).position.z())-2.*derivada[i]-derivada[i+1];
+      dz[i] = 2.*(flockCurves.get(i).position.z()-flockCurves.get(i+1).position.z())+derivada[i]+derivada[i+1];
+    }   
+    
+// PINTANDO LA CURVA. La presicion depende del alto valor de NUM_SEG
+    int NUM_SEG=20;
+    dt = 1./(double) NUM_SEG;
+    curves.add(new Vector(flockCurves.get(0).position.x(),flockCurves.get(0).position.y(),flockCurves.get(0).position.z()));  
+
+    for (i=0; i<m; i++) {
+      for (j=1, t=dt; j<NUM_SEG; j++, t+=dt) {
+        xp = (int) (ax[i]+bx[i]*t+cx[i]*t*t+dx[i]*t*t*t);
+        yp = (int) (ay[i]+by[i]*t+cy[i]*t*t+dy[i]*t*t*t);
+        zp = (int) (az[i]+bz[i]*t+cz[i]*t*t+dz[i]*t*t*t);
+        curves.add(new Vector(xp,yp,zp));
+      }
+    }
+}
+
+
 
 void walls() {
   pushStyle();
@@ -161,7 +282,7 @@ void mouseWheel(MouseEvent event) {
   scene.scale(event.getCount() * 20);
 }
 
-void keyPressed() { //<>//
+void keyPressed() {
   switch (key) {
   case '+':
     interpolator.addKeyFrame(flock.get(int(random(0,initBoidNum))).frame);
