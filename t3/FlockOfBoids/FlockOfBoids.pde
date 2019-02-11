@@ -5,7 +5,7 @@
  * This example displays the famous artificial life program "Boids", developed by
  * Craig Reynolds in 1986 [1] and then adapted to Processing by Matt Wetmore in
  * 2010 (https://www.openprocessing.org/sketch/6910#), in 'third person' eye mode.
- * The Boid under the mouse will be colored blue. If you click on a boid it will
+ * The Boid underivada the mouse will be colored blue. If you click on a boid it will
  * be selected as the scene avatar for the eye to follow it.
  *
  * 1. Reynolds, C. W. Flocks, Herds and Schools: A Distributed Behavioral Model. 87.
@@ -41,8 +41,6 @@ Interpolator interpolator;
 ArrayList<Boid> flockCurves=new ArrayList();
 ArrayList<Vector> curves =new ArrayList();
 
-
-
 void setup() {
   size(1000, 800, P3D);
   scene = new Scene(this);
@@ -69,13 +67,18 @@ void draw() {
   CubicCurves();
   if(!curves.isEmpty() ){        
   for(int i=0;i<curves.size()-1;i++){
-    strokeWeight(4); 
-    line(curves.get(i).x(), curves.get(i).y(), curves.get(i).z() , curves.get(i+1).x(), curves.get(i+1).y(), curves.get(i+1).z());
+
+    beginShape(LINES);
+    strokeWeight(4);
+    stroke(255,255,0);
+    vertex(curves.get(i).x(), curves.get(i).y(), curves.get(i).z());
+    vertex(curves.get(i+1).x(), curves.get(i+1).y(), curves.get(i+1).z());
+    endShape();
   }}
 }
 
 void sceneDrawPath(){
-    pushStyle();
+   pushStyle();
    strokeWeight(3);
    stroke(255,0,0);
    scene.drawPath(interpolator);
@@ -89,9 +92,9 @@ void CubicCurves ()
     flockCurves.add(flock.get(i));
   }
   
-  curves.clear();
-  int n=4;
-    int NUM_PTOS=10;
+    curves.clear();
+    int n=4;
+    int NUM_PTOS=12;
     int i, j, m;
     int xp, yp , zp;
     double [] ax = new double [NUM_PTOS], bx= new double [NUM_PTOS], 
@@ -176,7 +179,7 @@ void CubicCurves ()
       dz[i] = 2.*(flockCurves.get(i).position.z()-flockCurves.get(i+1).position.z())+derivada[i]+derivada[i+1];
     }   
     
-// PINTANDO LA CURVA. La presicion depende del alto valor de NUM_SEG
+// PINTANDO LA CURVA. 
     int NUM_SEG=20;
     dt = 1./(double) NUM_SEG;
     curves.add(new Vector(flockCurves.get(0).position.x(),flockCurves.get(0).position.y(),flockCurves.get(0).position.z()));  
@@ -190,8 +193,6 @@ void CubicCurves ()
       }
     }
 }
-
-
 
 void walls() {
   pushStyle();
@@ -282,7 +283,7 @@ void mouseWheel(MouseEvent event) {
   scene.scale(event.getCount() * 20);
 }
 
-void keyPressed() {
+void keyPressed() { //<>//
   switch (key) {
   case '+':
     interpolator.addKeyFrame(flock.get(int(random(0,initBoidNum))).frame);
