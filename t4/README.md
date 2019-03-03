@@ -22,7 +22,9 @@ Complete la tabla:
 
 | Integrante | github nick |
 |------------|-------------|
-|            |             |
+|Felipe Ramos        | pipemax85 |
+|Alejandro Sierra        | gasierram |
+
 
 
 ## Informe

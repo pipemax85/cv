@@ -16,10 +16,11 @@ class jParticle {
 
   } 
 
-  void run(float inx, float iny, float inz) { 
+  Vector run(float inx, float iny, float inz) { 
     update(); 
     render(inx, iny, inz); 
     //    print (counter);
+    return new Vector(loc.x,loc.y,loc.z-ms*4);
   } 
 
   void update() { 

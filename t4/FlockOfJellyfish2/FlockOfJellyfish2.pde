@@ -1,3 +1,15 @@
+
+/**
+* Flock of Jellyfish 
+* By Felipe Ramos & Alejandro Sierra
+*
+* This program is based on: 
+* 3D jellyfish created by VJ Fader www.vjfader.com
+* based on "anemone" by Giovanni Carlo Mingati http://www.openprocessing.org/visuals/?visualID=1439
+* Click and drag your mouseY to Zoom
+* mouseX and mouseY rotates.
+*/
+
 /**
  * Flock of Boids
  * by Jean Pierre Charalambos.
@@ -30,20 +42,21 @@ Scene scene;
 Interpolator interpolator;
 //flock bounding box
 int flockWidth = 2560; //5120
-int flockHeight = 2560;//640  5120
+int flockHeight =2560;//640  5120
 int flockDepth =2560;//2560
 boolean avoidWalls = true;
-boolean one = true;
-boolean two = false;
+boolean one = false;
+boolean two = true;
 
 int initBoidNum = 0; // amount of boids to start the program with
-ArrayList<Boid> flock;
+
 Frame avatar;
+
+Frame avatarJelly;
 boolean animate = true;
 
 //JELLYFISH
-int cantJelly = 1;
-//Jellyfish jelly = new Jellyfish();
+int cantJelly =4;
 ArrayList<Jellyfish> flockjelly;
 //JELLYFISH
 
@@ -57,25 +70,26 @@ void setup() {
   scene.setFieldOfView(PI / 3);
   scene.fitBall();
   // create and fill the list of boids
-  //flock = new ArrayList();
-  //for (int i = 0; i < initBoidNum; i++)
-  //  flock.add(new Boid(new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2)));
-  //colorMode(HSB, 360, 100, 100, 100); 
   
+  
+  colorMode(HSB, 360, 100, 100, 100); 
+
+ 
   flockjelly = new ArrayList();
   for (int i = 0; i < cantJelly; i++)
     flockjelly.add(new Jellyfish(i==0));
   //jelly.init2();
   interpolator =  new Interpolator(scene);
+  
 }
 
 
   
 
 void draw() {
-  background(10, 50, 25);
-  ambientLight(128, 128, 128);
-  directionalLight(255, 255, 255, 0, 1, -100);
+  background(224, 94, 28);
+  //ambientLight(128, 128, 128);
+  //directionalLight(255, 255, 255, 0, 1, -100);
   walls();
   scene.traverse();
 
@@ -84,12 +98,6 @@ void draw() {
   stroke(255,0,0);
   scene.drawPath(interpolator);
   popStyle();
-  
-  //jelly.draw2();
-  //for (int i = 0; i < cantJelly; i++)
-  //  flockjelly.get(i).drawJelly();
-  // uncomment to asynchronously update boid avatar. See mouseClicked()
-  // updateAvatar(scene.trackedFrame("mouseClicked"));
 }
 
 
@@ -127,10 +135,25 @@ void updateAvatar(Frame frame) {
   }
 }
 
+void updateAvatarJelly(Frame frame) {
+  if (frame != avatarJelly) {
+    avatarJelly = frame;
+    if (avatarJelly != null)
+      thirdPersonJelly();
+    else if (scene.eye().reference() != null)
+      resetEye();
+  }
+}
+
 // Sets current avatar as the eye reference and interpolate the eye to it
 void thirdPerson() {
-  scene.eye().setReference(avatar);
-  scene.interpolateTo(avatar);
+  //scene.eye().setReference(avatar);
+  //scene.interpolateTo(avatar);
+}
+
+void thirdPersonJelly() {
+  scene.eye().setReference(avatarJelly);
+  scene.interpolateTo(avatarJelly);
 }
 
 // Resets the eye
@@ -145,10 +168,12 @@ void resetEye() {
 void mouseClicked() {
   // two options to update the boid avatar:
   // 1. Synchronously
-  updateAvatar(scene.track("mouseClicked", mouseX, mouseY));
+  //updateAvatar(scene.track("mouseClicked", mouseX, mouseY));
+  updateAvatarJelly(scene.track("mouseClicked", mouseX, mouseY));
   // which is the same as these two lines:
    scene.track("mouseClicked", mouseX, mouseY);
-   updateAvatar(scene.trackedFrame("mouseClicked"));
+   //updateAvatar(scene.trackedFrame("mouseClicked"));
+   updateAvatarJelly(scene.trackedFrame("mouseClicked"));
    //2. Asynchronously
    //which requires updateAvatar(scene.trackedFrame("mouseClicked")) to be called within draw()
    scene.cast("mouseClicked", mouseX, mouseY);
@@ -176,9 +201,7 @@ void mouseMoved(MouseEvent event) {
   if (scene.eye().reference() != null)
     // press shift to move the mouse without looking around
     if (!event.isShiftDown())
-      //scene.lookAround();
-      //scene.cast();
-
+      scene.lookAround();
 }
 
 void mouseWheel(MouseEvent event) {
@@ -207,7 +230,7 @@ void keyPressed() {
   
   case '+':
     int index = int(random(0,initBoidNum));
-    interpolator.addKeyFrame(flock.get(index).frame);
+    //interpolator.addKeyFrame(flock.get(index).frame);
     break;
   case '-':
     if(interpolator.keyFrames().isEmpty()){
