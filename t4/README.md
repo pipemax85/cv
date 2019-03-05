@@ -27,6 +27,8 @@ Complete la tabla:
 
 ## Informe
 
+## Informe
+
 Unas de las criaturas mas interesantes y fuera de lo común en nuestro planeta son las **medusas** (Medusozoa), animales marinos de cuerpo gelatinoso y simétrico cuyas características son poco conocidas sobretodo en nuestro entorno local. 
 Los hechos mas curiosos e interesantes de estos animales y su existencia fueron objeto de estudio para nosotros y por esta razón realizamos este taller como símbolo de reconocimiento para estas criaturas majestuosas, que nos dejan atonitos de sus capacidades y naturaleza, demostrando asi que la vida misma y la existencia es algo magico y que realmente todo aquello que conocemos como universo contiene seres dignos de reconocer que muy probablemente un ser superior seria quien podria construir tan semejante obra de arte.  
 
@@ -74,7 +76,7 @@ Nuestra idea es entonces, construir una escena donde se tenga como elemento prin
 Para la creación de una medusa se realizo la creación de su cabeza y luego de sus tentáculos, basando como referencia la implementación de ["anemone"]( http://www.openprocessing.org/visuals/?visualID=1439
 ) por Giovanni Carlo Mingati quien a su vez se basa en el sorprendente trabajo que realiza el artista multimedia [James Fader](https://vjfader.com/about/) en eventos como Coachella, Burning Man, Insomniac, Fuji Rock, Mapping Festival, Backwoods and Intro Music Festival.
 
-La clase JParticle es la encargada de generar los tentaculos de la Medusa, que posteriormente se unifican y renderizan para crear el aspecto visual y la percepcion de movimiento y morfologia de la misma. Para la cabeza el algoritmo construye curvas de [Bezier](https://es.wikipedia.org/wiki/Curva_de_B%C3%A9zier)
+La clase **JParticle** es la encargada de generar los tentaculos de la Medusa, que posteriormente se unifican y renderizan para crear el aspecto visual y la percepción de movimiento y morfología de la misma. Para la cabeza el algoritmo construye curvas de [Bezier](https://es.wikipedia.org/wiki/Curva_de_B%C3%A9zier)
 
  
 
@@ -95,8 +97,62 @@ La clase JParticle es la encargada de generar los tentaculos de la Medusa, que p
 	       bezier(loc.x + (inx-loc.x)/1.5,loc.y + (iny-loc.y)/1.5,inz+20, loc.x - (inx-loc.x)/40,loc.y - (iny-loc.y)/40,inz+40,loc.x - (inx-loc.x)/3,loc.y - (iny-loc.y)/3,inz-10,loc.x,loc.y,loc.z + lengthVar);
 	    }
       } 
-Luego, construimos un PSystem que agrega varios tentáculos y construye el "sistema" como esta compuesta la medusa
- 
+Luego, construimos un **PSystem** que agrega varios tentáculos y construye el "sistema de partículas" como esta compuesta la medusa. Para ello utilizamos un vector de posición con las coordenadas x,y,z dentro del frame y otro vector para realizar el movimiento que tienen las medusas que parecen contracciones. 
+
+    Vector run(float inx, float iny, float inz, float r) 
+      { 
+        Vector positionTemp = null;
+        update(inx,iny,inz,r);     
+        for (int i = particles.size()-1; i >= 0; i--) {         
+          jParticle prt = (jParticle) particles.get(i); 
+          if (positionTemp == null)
+              positionTemp = prt.run(inx, iny, inz); 
+          prt.run(inx, iny, inz); 
+          prt.move(new PVector(ps_loc.x,ps_loc.y,ps_loc.z));  
+        }
+        return ps_loc2;
+    }
+
+En la clase **Jellyfish** construimos la medusa junto con su movimiento natural como lo conocemos. Para la construcción de la cabeza utilizamos coordenadas polares y para el movimiento creamos la sensación de un movimiento con números aleatorios controlados. Utilizamos la libreria Frames para crear un **Frame** sobre la escena y logramos crear varias medusas que se mueven sobre la escena. 
+
+    Jellyfish(boolean vel) {
+      this.vel=vel;
+      inx = 0; 
+      iny = 0; 
+      
+      for(int i=0; i<numSystems; i++){ 
+        // dispose PSystems in a circle 
+        x = r * cos(theta); 
+        y = r * sin(theta); 
+        z = 1;
+        x += inx; 
+        y += iny;       
+        ps[i] = new PSystem(new PVector(x, y, z), 60, theta);  
+        theta += 0.16; //0.057,inx,iny,inz,r2;
+      } 
+      r = 20.0f; //40
+      amplitude = r; 
+      frame = new Frame(scene) {
+        // Note that within visit() geometry is defined at the
+        // frame local coordinate system.
+        @Override
+        public void visit() {
+          if (animate)
+            run();
+           }    
+      };
+      position = new Vector();
+      position.set(inx,iny,iny);
+      frame.setPosition(position);
+![Jellfish](https://lh3.googleusercontent.com/lEIPOJvFw3FY_sAMqvWx8kVH51acHMOIQDCPedVY_h9jBGJEj9s_m_MPPqj_4dhfvfRkz5bX1SS1 "Jellfish")
+
+Para implementar la cámara en tercera persona utilizamos un objeto-cámara que sigue a cada una de las medusas y la idea es que la interacción a través del mouse permita la vista de cámara de tercera persona ([Navigation](https://visualcomputing.github.io/Interaction/)) y el control de la aplicación.
+![Flock](https://lh3.googleusercontent.com/HpGL-TdiNnSf_ojQErXRCRw0paPG7R9ezUzyThqk4Th2U-nJQrPEApjFz2nRADcyrAe7LZHSD1Hp "FlockOfJellfish")  
+
+
+![enter image description here](https://lh3.googleusercontent.com/8ue9BaOlyAfy2lBn2NS5eynVQDmEFo6FGrFZD2KUXdrwMlVEG7M5QPxknwSV4R9vML0oScYmWLxS "third")
+
+Como resultado obtenemos una excelente y muy relajante interacción como quien ha tenido la oportunidad de bucear o nadar debajo del agua en el mar y siente esa inmersión en otro mundo totalmente desconocido y cuya dimensión es mucho mas grande que lo que el ser humano puede imaginar. Es por esto que las medusas son un gran e interesante animal que habita en el agua y que con ejercicios como estos podemos mostrar a través de Frames estos escenarios donde se aplican las tres técnicas principales de interacción y ver un manejador (*handler*)  de grafo de escena de alto nivel con la implementación en Processing.  
 ## Entrega
 
 Fecha límite Domingo 3/3/19 a las 24h.
