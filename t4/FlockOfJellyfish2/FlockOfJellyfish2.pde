@@ -41,16 +41,13 @@ import frames.processing.*;
 Scene scene;
 Interpolator interpolator;
 //flock bounding box
-int flockWidth = 2560; //5120
-int flockHeight =2560;//640  5120
-int flockDepth =2560;//2560
+int flockWidth = 1280; //5120
+int flockHeight =1280;//640  5120
+int flockDepth =1280;//2560
 boolean avoidWalls = true;
-boolean one = false;
-boolean two = true;
-
-int initBoidNum = 0; // amount of boids to start the program with
-
-Frame avatar;
+boolean one = true;
+boolean two = false;
+ // amount of boids to start the program with
 
 Frame avatarJelly;
 boolean animate = true;
@@ -58,35 +55,31 @@ boolean animate = true;
 //JELLYFISH
 int cantJelly =4;
 ArrayList<Jellyfish> flockjelly;
+//PShader munchShader;
 //JELLYFISH
 
 int zoom;
-
 void setup() {
   size(800, 720, P3D);
   scene = new Scene(this);
-  scene.setBoundingBox(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
-  scene.setAnchor(scene.center());
-  scene.setFieldOfView(PI / 3);
-  scene.fitBall();
+  scene.setFrustum(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
+  scene.fit();
   // create and fill the list of boids
   
-  
   colorMode(HSB, 360, 100, 100, 100); 
-
  
   flockjelly = new ArrayList();
   for (int i = 0; i < cantJelly; i++)
-    flockjelly.add(new Jellyfish(i==0));
-  //jelly.init2();
+    flockjelly.add(new Jellyfish());
   interpolator =  new Interpolator(scene);
   
 }
-
-
-  
-
 void draw() {
+  float  time = (float) millis();
+//  munchShader.set("u_time",time/2000.0);
+//  munchShader.set("u_resolution",1280.0,720.0);
+//   munchShader = loadShader("munchShader.glsl");
+//    shader(munchShader);
   background(224, 94, 28);
   //ambientLight(128, 128, 128);
   //directionalLight(255, 255, 255, 0, 1, -100);
@@ -125,16 +118,6 @@ void walls() {
   popStyle();
 }
 
-void updateAvatar(Frame frame) {
-  if (frame != avatar) {
-    avatar = frame;
-    if (avatar != null)
-      thirdPerson();
-    else if (scene.eye().reference() != null)
-      resetEye();
-  }
-}
-
 void updateAvatarJelly(Frame frame) {
   if (frame != avatarJelly) {
     avatarJelly = frame;
@@ -145,15 +128,12 @@ void updateAvatarJelly(Frame frame) {
   }
 }
 
-// Sets current avatar as the eye reference and interpolate the eye to it
-void thirdPerson() {
-  //scene.eye().setReference(avatar);
-  //scene.interpolateTo(avatar);
-}
-
 void thirdPersonJelly() {
+  
   scene.eye().setReference(avatarJelly);
-  scene.interpolateTo(avatarJelly);
+  //scene.eye().orbit(new Quaternion(new Vector(1, 0, 0), (mouseX - pmouseX) * PI / width), scene.eye());
+  scene.fit(avatarJelly, 1);
+  //scene.interpolateTo(avatarJelly);
 }
 
 // Resets the eye
@@ -161,7 +141,7 @@ void resetEye() {
   // same as: scene.eye().setReference(null);
   scene.eye().resetReference();
   scene.lookAt(scene.center());
-  scene.fitBallInterpolation();
+  scene.fit(1);
 }
 
 // picks up a boid avatar, may be null
@@ -169,28 +149,32 @@ void mouseClicked() {
   // two options to update the boid avatar:
   // 1. Synchronously
   //updateAvatar(scene.track("mouseClicked", mouseX, mouseY));
-  updateAvatarJelly(scene.track("mouseClicked", mouseX, mouseY));
+  scene.track("mouseClicked", mouseX, mouseY);
+  //updateAvatarJelly(scene.track("mouseClicked", mouseX, mouseY));
   // which is the same as these two lines:
-   scene.track("mouseClicked", mouseX, mouseY);
+   //scene.track("mouseClicked", mouseX, mouseY);
    //updateAvatar(scene.trackedFrame("mouseClicked"));
    updateAvatarJelly(scene.trackedFrame("mouseClicked"));
    //2. Asynchronously
    //which requires updateAvatar(scene.trackedFrame("mouseClicked")) to be called within draw()
-   scene.cast("mouseClicked", mouseX, mouseY);
+   //scene.cast("mouseClicked", mouseX, mouseY);
 }
 
 // 'first-person' interaction
 void mouseDragged() {
   if (scene.eye().reference() == null)
-    if (mouseButton == LEFT)
+    if (mouseButton == LEFT){
       // same as: scene.spin(scene.eye());
       scene.spin();
+      //scene.cast("mouseDragged", mouseX, mouseY);
+      //avatarJelly.orbit(new Quaternion(new Vector(1, 0, 0), (mouseX - pmouseX) * PI / width), scene.eye() );
+    }
     else if (mouseButton == RIGHT)
       // same as: scene.translate(scene.eye());
       scene.translate();
     else
       // same as: scene.zoom(mouseX - pmouseX, scene.eye());
-      scene.zoom(mouseX - pmouseX);
+      scene.moveForward(mouseX - pmouseX);
 }
 
 // highlighting and 'third-person' interaction
@@ -202,6 +186,8 @@ void mouseMoved(MouseEvent event) {
     // press shift to move the mouse without looking around
     if (!event.isShiftDown())
       scene.lookAround();
+    else
+      avatarJelly.orbit(new Quaternion(new Vector(1, 0, 0), (mouseX - pmouseX) * PI / width), avatarJelly);
 }
 
 void mouseWheel(MouseEvent event) {
@@ -216,7 +202,7 @@ void keyPressed() {
     break;
   case 's':
     if (scene.eye().reference() == null)
-      scene.fitBallInterpolation();
+      scene.fit(1);
     break;
   case 't':
     scene.shiftTimers();
@@ -229,7 +215,7 @@ void keyPressed() {
     break;
   
   case '+':
-    int index = int(random(0,initBoidNum));
+    //int index = int(random(0,initBoidNum));
     //interpolator.addKeyFrame(flock.get(index).frame);
     break;
   case '-':
@@ -249,8 +235,8 @@ void keyPressed() {
   case ' ':
     if (scene.eye().reference() != null)
       resetEye();
-    else if (avatar != null)
-      thirdPerson();
+    else if (avatarJelly != null)
+      thirdPersonJelly();
     break;
   case '1':
     one = !one;

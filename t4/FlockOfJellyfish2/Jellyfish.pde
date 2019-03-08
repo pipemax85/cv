@@ -6,13 +6,15 @@ float jxSpeed, jySpeed, jzSpeed, jxRot,jyRot,jzRot;
 int numSystems = 40; 
 PSystem[] ps = new PSystem[numSystems]; 
 float inx, iny, inz; 
+
+float inxini, inyini, inzini; 
+
 Vector position;
 
 float theta, theta2 = 0.0f; 
 float amplitude;   
 float x, y,z; 
 float r; 
-boolean vel;
 
 float rotx,roty;
 int bounds = 1000;
@@ -26,8 +28,7 @@ boolean moveinxrev = false;
 boolean moveinyrev = false;
 boolean moveinzrev = false;
 
-Jellyfish(boolean vel) {
-  this.vel=vel;
+Jellyfish() {
   inx = 0; 
   iny = 0; 
   
@@ -57,6 +58,9 @@ Jellyfish(boolean vel) {
   };
   position = new Vector();
   position.set(inx,iny,iny);
+  inxini = inx;
+  inyini = iny;
+  inzini = inz;
   frame.setPosition(position);
 
   this.jxSpeed = 1;
@@ -78,9 +82,6 @@ Jellyfish(boolean vel) {
        moveinz = true;
      }
   }
-  //moveinx = false;
-  //moveiny = false;
-  //moveinz = true;
 }
 
 
@@ -94,7 +95,7 @@ void render(){
      if (scene.trackedFrame("mouseMoved") == frame) {
       stroke(color(0, 255, 255));
       fill(color(0, 255, 255));
-    }
+    }  
     
         // highlight avatar
     if (frame ==  avatarJelly) {
@@ -188,11 +189,9 @@ void run()
   position = new Vector();
   position.set(inx,iny,inz+70);
   
-  Vector positionTemp = new Vector();
   for(int i = 0; i < numSystems; i++) 
-    positionTemp = ps[i].run(inx, iny, inz,r);
-  frame.setPosition(positionTemp);  
-  //frame.setPosition(position);  
+    ps[i].run(inxini, inyini, inzini,r);
+  frame.setPosition(position);  
    render();
  popMatrix();
   checkBounds();
@@ -207,8 +206,8 @@ void waveR()
 } 
 
   void checkBounds() {
-    if (position.x() > flockWidth/2){
-      position.setX(0);
+    if (position.x() > flockWidth){
+      position.setX(flockWidth);
       System.out.println ("position.x() > flockWidth");
       moveinx = false;
       moveinxrev = random(1.0, 3.0) <= 1.5;
@@ -231,7 +230,7 @@ void waveR()
       }
     } 
     if (position.x() < 0){
-      position.setX(flockWidth);
+      position.setX(0);
       System.out.println ("position.x() < 0");
       moveinxrev = false; 
       moveinx = random(1.0, 3.0) <= 1.5;
@@ -253,8 +252,8 @@ void waveR()
          }
       }
     }
-    if (position.y() > flockHeight/2){
-      position.setY(0);
+    if (position.y() > flockHeight){
+      position.setY(flockHeight);
       System.out.println ("position.y() > flockHeight");
       moveiny = false;
       moveinyrev = random(1.0, 3.0) <= 1.5;
@@ -277,7 +276,7 @@ void waveR()
       }
     }     
     if (position.y() < 0){
-      position.setY(flockHeight/2);
+      position.setY(0);
       System.out.println ("position.y() < 0");
       moveinyrev = false;
       moveiny = random(1.0, 3.0) <= 1.5;
@@ -300,8 +299,8 @@ void waveR()
       }
       
     }
-    if (position.z() > flockDepth/2){
-      position.setZ(0);
+    if (position.z() > flockDepth){
+      position.setZ(flockDepth);
       moveinz = false;
       moveinzrev = random(1.0, 3.0) <= 1.5;
       moveinx = random(1.0, 3.0) <= 1.5;
@@ -324,7 +323,7 @@ void waveR()
       System.out.println ("position.z() > flockDepth");
     }    
     if (position.z() < 0){
-      position.setZ(flockDepth);
+      position.setZ(0);
       System.out.println ("position.z() < 0");
       moveinzrev = false;
       moveinz = random(1.0, 3.0) <= 1.5;
@@ -349,9 +348,5 @@ void waveR()
     }
       
   }
-
-//void mouseDragged () {
-//  zoom =-mouseY*4;
-//}
 
 }
