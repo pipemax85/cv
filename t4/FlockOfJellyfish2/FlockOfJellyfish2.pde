@@ -1,4 +1,3 @@
-
 /**
 * Flock of Jellyfish 
 * By Felipe Ramos & Alejandro Sierra
@@ -48,7 +47,7 @@ boolean avoidWalls = true;
 boolean one = true;
 boolean two = false;
  // amount of boids to start the program with
-
+PShader toon;
 Frame avatarJelly;
 boolean animate = true;
 
@@ -58,9 +57,22 @@ ArrayList<Jellyfish> flockjelly;
 //PShader munchShader;
 //JELLYFISH
 
+Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
+Shape[] shapes;
+PGraphics shadowMap;
+PShader depthShader;
+float zNear = 50;
+float zFar = flockDepth;
+int w = 1000;
+int h = 1000;
+
+
 int zoom;
 void setup() {
   size(800, 720, P3D);
+  toon = loadShader("ToonFrag.glsl", "ToonVert.glsl");
+  toon.set("fraction", 1.0);
+  
   scene = new Scene(this);
   scene.setFrustum(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
   scene.fit();
@@ -73,16 +85,76 @@ void setup() {
     flockjelly.add(new Jellyfish());
   interpolator =  new Interpolator(scene);
   
+  scene.setRadius(max(w, h));
+  scene.fit(1);
+  shapes = new Shape[20];
+  for (int i = 0; i < shapes.length; i++) {
+    shapes[i] = new Shape(scene) {
+      @Override
+      public void setGraphics(PGraphics pg) {
+        pg.pushStyle();
+        if (scene.trackedFrame("light") == this) {
+          //Scene.drawAxes(pg, 150);
+          pg.fill(0, scene.isTrackedFrame(this) ? 255 : 0, 255, 120);
+          //Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
+        } 
+        pg.popStyle();
+      }
+      @Override
+      public void interact(Object... gesture) {
+      }
+    };
+    shapes[i].randomize();
+    shapes[i].setHighlighting(Shape.Highlighting.NONE);
+  }
+  shadowMap = createGraphics(w / 2, h / 2, P3D);
+  depthShader = loadShader("depth.glsl");
+  depthShader.set("near", zNear);
+  depthShader.set("far", zFar);
+  shadowMap.shader(depthShader);
+
+  scene.setTrackedFrame("light", shapes[(int) random(0, shapes.length - 1)]);
+   scene.trackedFrame("light").setOrientation(new Quaternion(new Vector(0, 0, 1), scene.trackedFrame("light").position()));
 }
+
 void draw() {
+
   float  time = (float) millis();
 //  munchShader.set("u_time",time/2000.0);
 //  munchShader.set("u_resolution",1280.0,720.0);
 //   munchShader = loadShader("munchShader.glsl");
 //    shader(munchShader);
+  
   background(224, 94, 28);
-  //ambientLight(128, 128, 128);
-  //directionalLight(255, 255, 255, 0, 1, -100);
+  
+  //shader(toon);
+  //background(0);
+  float dirY = (mouseY / float(height) - 0.5) * 2;
+  float dirX = (mouseX / float(width) - 0.5) * 2;
+  directionalLight(204, 204, 204, -dirX, -dirY, -1);
+  //translate(width/2, height/2);
+  sphere(120);
+  //background(0);
+  //translate(width/2, height/2);
+  //rotateY(map(mouseX, 0, width, -PI, PI));
+  //rotateX(map(mouseY, 0, height, -PI, PI));
+  //scale(10);
+  //noFill();
+  stroke(0,255,255);
+  // box(1); 
+  for (float x = 0; x < flockWidth; x+=100) {
+    for (float z = 0; z < flockHeight; z+=100) {
+      pushMatrix();
+      translate(0, flockHeight, 0);
+      translate(x, noise(x+100, z+100), z);
+      scale(1);
+      fill(255*noise(x+100, z+100));
+      noStroke();
+      box(100);
+      popMatrix();
+    }
+  }
+  //sphere(400);
   walls();
   scene.traverse();
 
@@ -91,10 +163,24 @@ void draw() {
   stroke(255,0,0);
   scene.drawPath(interpolator);
   popStyle();
+  
+  
+  
+  //  background(75, 25, 15);
+  // 1. Fill in and display front-buffer
+ // scene.traverse();
+  // 2. Fill in shadow map using the light point of view
+  if (scene.trackedFrame("light") != null) {
+    shadowMap.beginDraw();
+    shadowMap.background(140, 160, 125);
+    scene.traverse(shadowMap, shadowMapType, scene.trackedFrame("light"), zNear, zFar);
+    shadowMap.endDraw();
+    // 3. Display shadow map
+    scene.beginHUD();
+    image(shadowMap, w / 2, h / 2);
+    scene.endHUD();
+  }
 }
-
-
-
 
 void walls() {
   pushStyle();

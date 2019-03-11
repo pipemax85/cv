@@ -25,7 +25,6 @@ Complete la tabla:
 |Felipe Ramos        | pipemax85 |
 |Alejandro Sierra        | gasierram |
 
-## Informe
 
 ## Informe
 
@@ -152,7 +151,38 @@ Para implementar la cámara en tercera persona utilizamos un objeto-cámara que 
 
 ![enter image description here](https://lh3.googleusercontent.com/8ue9BaOlyAfy2lBn2NS5eynVQDmEFo6FGrFZD2KUXdrwMlVEG7M5QPxknwSV4R9vML0oScYmWLxS "third")
 
-Como resultado obtenemos una excelente y muy relajante interacción como quien ha tenido la oportunidad de bucear o nadar debajo del agua en el mar y siente esa inmersión en otro mundo totalmente desconocido y cuya dimensión es mucho mas grande que lo que el ser humano puede imaginar. Es por esto que las medusas son un gran e interesante animal que habita en el agua y que con ejercicios como estos podemos mostrar a través de Frames estos escenarios donde se aplican las tres técnicas principales de interacción y ver un manejador (*handler*)  de grafo de escena de alto nivel con la implementación en Processing.  
+Como resultado obtenemos una excelente y muy relajante interacción como quien ha tenido la oportunidad de bucear o nadar debajo del agua en el mar y siente esa inmersión en otro mundo totalmente desconocido y cuya dimensión es mucho mas grande que lo que el ser humano puede imaginar. Es por esto que las medusas son un gran e interesante animal que habita en el agua y que con ejercicios como estos podemos mostrar a través de Frames estos escenarios donde se aplican las tres técnicas principales de interacción y ver un manejador (*handler*)  de grafo de escena de alto nivel con la implementación en Processing.
+
+
+### Shaders
+
+Para esta parte realizamos la implementación de un ejercicio utilizando un Shader y el shadow mapping. Empleamos la escena del FlockOfJellfish de manera que relacionamos los conceptos vistos en clase, la documentación de processing y los ejemplos dados por el profesor.
+Dada la documentación de [shaders by Andres Colubri](https://processing.org/tutorials/pshader/)  tomamos un shader (Toon Effect) y lo agregamos para crear un terreno compuesto por cubos que emulaba un piso con Toon effect. Para esta parte generamos también una luz ambiental que interactua con el movimiento del mouse. 
+![enter image description here](https://lh3.googleusercontent.com/-1wNdvd8tTp6A3CIwudOpbEP_k6R1BgperdqFzv-nosWjXgfajna3wru7tH0_pLwHO_uTp_kScfF)
+  En este caso entonces el resultado fue un terreno en forma de piso compuesto por los cubos y con un efecto degradado, la idea era generar un terreno similar al suelo marino. Como resultado y para propósitos de este taller, únicamente se logro emular el terreno como un piso.
+  ![enter image description here](https://lh3.googleusercontent.com/XgBQyIrBUt2dK2hzN8raB6mykw2UVjdx8XmcAru6J6KWZXubX6Bo8P6PPaldBlgHb2SKwkKLg6Dw) 
+
+##### ShadowMapping 
+
+Para propósito del taller se realizo el estudio del shadow mapping y se implementó de manera similar al ejemplo explicado por el profesor en clase. Nuestra escena tiene como resultado entonces:
+
+Un Shape() que de acuerdo a la luz va pintando sobre la escena el frame que se ve por delante.
+Cargamos el shadowMap (loadShader()) con base en "depth.glsl" el cual genera el mapa y de acuerdo al origen de la luz ajustamos la orientacion con Quaternion
+
+      shadowMap = createGraphics(w / 2, h / 2, P3D);
+      depthShader = loadShader("depth.glsl");
+      depthShader.set("near", zNear);
+      depthShader.set("far", zFar);
+      shadowMap.shader(depthShader);
+    
+      scene.setTrackedFrame("light", shapes[(int) random(0, shapes.length - 1)]);
+       scene.trackedFrame("light").setOrientation(new Quaternion(new Vector(0, 0, 1), scene.trackedFrame("light").position()));
+
+El efecto que se produce es similar al del ejemplo visto, sin embargo y dado que se realizo una escena que emulara el océano, al pintar el shadow map se vuelve un poco mas difícil de apreciar.
+![enter image description here](https://lh3.googleusercontent.com/5giLtJL4DLtSJCsiRxMUUojfIUkWGoeKD-odAxEMM4osmV1zupxQhbyNEapLInZmGu4fT7dwpgXh)
+
+
+  
 ## Entrega
 
 Fecha límite Domingo 3/3/19 a las 24h.
